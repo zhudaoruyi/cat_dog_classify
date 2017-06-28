@@ -18,7 +18,8 @@ BAT_SIZE = 40
 FC_SIZE = 1024
 NB_IV3_LAYERS_TO_FREEZE = 172
 
-# 定义一个获取训练集和验证集中的样本数量，即nb_train_samples,nb_val_samples
+
+# 定义一个方法——获取训练集和验证集中的样本数量，即nb_train_samples,nb_val_samples
 def get_nb_files(directory):
     """Get number of files by searching directory recursively"""
     if not os.path.exists(directory):
@@ -26,10 +27,11 @@ def get_nb_files(directory):
     cnt = 0
     for r, dirs, files in os.walk(directory):
         for dr in dirs:
-            cnt += len(glob.glob(os.path.join(r, dr + "/*")))
+            cnt += len(glob.glob(os.path.join(r, dr + "/*")))       # glob模块是用来查找匹配文件的，后面接匹配规则。
     return cnt
 
 
+# 定义迁移学习的函数，不需要训练的部分。
 def setup_to_transfer_learn(model, base_model):
     """Freeze all layers and compile the model"""
     for layer in base_model.layers:
@@ -37,6 +39,7 @@ def setup_to_transfer_learn(model, base_model):
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
 
+# 定义增加迁移学习最后一个全连接层的函数
 def add_new_last_layer(base_model, nb_classes):
     """Add last layer to the convnet
 
@@ -55,6 +58,7 @@ def add_new_last_layer(base_model, nb_classes):
     return model
 
 
+# 定义微调函数
 def setup_to_finetune(model):
     """Freeze the bottom NB_IV3_LAYERS and retrain the remaining top layers.
 
@@ -70,6 +74,7 @@ def setup_to_finetune(model):
     model.compile(optimizer=SGD(lr=0.0001, momentum=0.9), loss='categorical_crossentropy', metrics=['accuracy'])
 
 
+# 定义训练函数
 def train(args):
     """Use transfer learning and fine-tuning to train a network on a new dataset"""
     nb_train_samples = get_nb_files(args.train_dir)
@@ -160,6 +165,7 @@ def plot_training(history):
     plt.show()
 
 
+# 主程序，定义命令行参数输入，开始工作。
 if __name__=="__main__":
     a = argparse.ArgumentParser()
     a.add_argument("--train_dir")
